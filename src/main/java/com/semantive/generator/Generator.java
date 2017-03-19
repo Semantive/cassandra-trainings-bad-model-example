@@ -8,38 +8,42 @@ import com.semantive.generator.model.UrlSimilarityScore;
 import java.net.InetAddress;
 import java.util.*;
 
-class Generator {
+public class Generator {
 
-    private static Integer APPKEY_LENGTH = 16;
-    private static Integer URL_LENGTH = 32;
+    private static Integer APPKEY_LENGTH = 4;
+    private static Integer URL_LENGTH = 16;
 
-    private static String DEFAULT_ALPHABET = "qwertyuiopasdfghjklzxcvbnm1234567890";
+    private static String CONSONANTS = "qwrtpsdfghjklzxcvbnm";
+    private static String VOWELS = "eyuioa";
 
     private Random random;
 
 
-    Generator() {
+    public Generator() {
         this.random = new Random();
     }
 
-    Integer intFromRange(Integer min, Integer max) {
+    public Integer intFromRange(Integer min, Integer max) {
         return random.nextInt(max - min) + min;
     }
 
-    private String genString(int l, String alphabet) {
+    private String genString(int l) {
         StringBuilder result = new StringBuilder();
+        String alphabets[] = { CONSONANTS, VOWELS };
 
-        for(int i = 0; i < l; ++ i)
-            result.append(alphabet.charAt(this.random.nextInt(alphabet.length())));
+        for(int i = 0; i < l; ++ i) {
+            result.append(alphabets[i % 2].charAt(this.random.nextInt(alphabets[i % 2].length())));
+        }
+
 
         return result.toString();
     }
 
     private String genAppKey() {
-        return genString(APPKEY_LENGTH, DEFAULT_ALPHABET);
+        return genString(APPKEY_LENGTH);
     }
 
-    Set<String> appKeys(int n) {
+    public Set<String> appKeys(int n) {
         Set<String> results = new HashSet<>(n);
 
         for(int i = 0; i < n; ++ i)
@@ -50,22 +54,22 @@ class Generator {
 
     private Page genPage(String appKey) {
         return new Page(
-            genString(URL_LENGTH, DEFAULT_ALPHABET),
+            genString(URL_LENGTH),
             appKey,
-            genString(16, DEFAULT_ALPHABET),
+            genString(16),
             new Date(),
-            genString(16, DEFAULT_ALPHABET),
-            genString(16, DEFAULT_ALPHABET),
-            genString(16, DEFAULT_ALPHABET),
+            genString(16),
+            genString(16),
+            genString(16),
             random.nextBoolean(),
-            genString(4096, DEFAULT_ALPHABET),
-            genString(1024, DEFAULT_ALPHABET),
-            genString(64, DEFAULT_ALPHABET),
-            genString(URL_LENGTH, DEFAULT_ALPHABET)
+            genString(4096),
+            genString(1024),
+            genString(64),
+            genString(URL_LENGTH)
         );
     }
 
-    Set<Page> pages(Set<String> appKeys, int n) {
+    public Set<Page> pages(Set<String> appKeys, int n) {
         Set<Page> results = new HashSet<>(n * appKeys.size());
 
         for(int i = 0; i < n; ++ i)
@@ -83,16 +87,16 @@ class Generator {
             random.nextInt(16),
             new Date(),
             InetAddress.getLoopbackAddress(),
-            genString(URL_LENGTH, DEFAULT_ALPHABET),
+            genString(URL_LENGTH),
             new Date(),
-            genString(16, DEFAULT_ALPHABET),
-            genString(16, DEFAULT_ALPHABET),
-            genString(URL_LENGTH, DEFAULT_ALPHABET),
-            genString(64, DEFAULT_ALPHABET)
+            genString(16),
+            genString(16),
+            genString(URL_LENGTH),
+            genString(64)
         );
     }
 
-    Set<PageView> views(Set<String> appKeys, int n) {
+    public Set<PageView> views(Set<String> appKeys, int n) {
         Set<PageView> results = new HashSet<>(n * appKeys.size());
 
         for(int i = 0; i < n; ++ i)
@@ -105,13 +109,13 @@ class Generator {
     private UrlSimilarityScore genUrlSimilarityScore(String appKey) {
         return new UrlSimilarityScore(
             appKey,
-            genString(URL_LENGTH, DEFAULT_ALPHABET),
-            genString(URL_LENGTH, DEFAULT_ALPHABET),
+            genString(URL_LENGTH),
+            genString(URL_LENGTH),
             random.nextFloat()
         );
     }
 
-    Set<UrlSimilarityScore> scores(Set<String> appKeys, int n) {
+    public Set<UrlSimilarityScore> scores(Set<String> appKeys, int n) {
         Set<UrlSimilarityScore> results = new HashSet<>(n * appKeys.size());
 
         for(int i = 0; i < n; ++ i)
