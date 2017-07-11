@@ -7,6 +7,7 @@ import com.semantive.generator.model.Page;
 import com.semantive.generator.model.PageView;
 import com.semantive.generator.model.UrlSimilarityScore;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class SelectThread extends CassandraThread {
@@ -21,49 +22,64 @@ public class SelectThread extends CassandraThread {
             Generator generator = new Generator();
 
             while(true) {
-                Set<String> appKeys = generator.appKeys(APPS_WIH_URLS_NO);
+                Integer threshold = generator.intFromRange(0, 64);
+                Set<String> appKeys = new HashSet<>();
 
-                Set<Page> pages = generator.pages(appKeys,
-                        generator.intFromRange(PAGES_PER_APP_KEY_MIN, PAGES_PER_APP_KEY_MAX));
-
-                Set<PageView> views = generator.views(appKeys,
-                        generator.intFromRange(VIEWS_PER_APP_KEY_MIN, VIEWS_PER_APP_KEY_MAX));
-
-                Set<UrlSimilarityScore> scores = generator.scores(appKeys,
-                        generator.intFromRange(SCORES_PER_APP_KEY_MIN, SCORES_PER_APP_KEY_MAX));
-
-                System.out.println("Data generated");
-
-                PreparedStatement stmtPage = session.prepare("SELECT * " +
-                        "FROM pages " +
-                        "WHERE cleaned_url = ?");
-
-                PreparedStatement stmtView = session.prepare("SELECT * " +
-                        "FROM page_views " +
-                        "WHERE app_key = ?");
-
-                PreparedStatement stmtScore = session.prepare("SELECT * " +
-                        "FROM url_similarity_score " +
-                        "WHERE app_key = ?");
-
-                for (Page page : pages) {
-                    session.execute(stmtPage.bind(page.getCleanedUrl()));
+                for(String appKey : Generator.appKeys.keySet()) {
+                    if(Generator.appKeys.get(appKey) >= threshold) {
+                        System.out.println("Will get: " + appKey);
+                        appKeys.add(appKey);
+                    }
                 }
 
-                System.out.println("Pages queried.");
+                for(String appKey: appKeys) {
 
-                for (PageView view : views) {
-                    session.execute(stmtView.bind(view.getAppKey()));
+                    Set<Page> pages = generator.pages(appKey,
+                            generator.intFromRange(PAGES_PER_APP_KEY_MIN, PAGES_PER_APP_KEY_MAX) / 4);
+
+                    Set<PageView> views = generator.views(appKey,
+                            generator.intFromRange(VIEWS_PER_APP_KEY_MIN, VIEWS_PER_APP_KEY_MAX) / 4);
+
+                    Set<UrlSimilarityScore> scores = generator.scores(appKey,
+                            generator.intFromRange(SCORES_PER_APP_KEY_MIN, SCORES_PER_APP_KEY_MAX) / 4);
+
+                    System.out.println("Data generated: " + threshold);
+
+                    PreparedStatement stmtPage = session.prepare("SELECT * " +
+                            "FROM pages " +
+                            "WHERE cleaned_url = ?");
+
+                    PreparedStatement stmtView = session.prepare("SELECT * " +
+                            "FROM page_views " +
+                            "WHERE app_key = ?");
+
+                    PreparedStatement stmtScore = session.prepare("SELECT * " +
+                            "FROM url_similarity_score " +
+                            "WHERE app_key = ?");
+
+                    for (Page page : pages) {
+                        session.execute(stmtPage.bind(page.getCleanedUrl()));
+                    }
+
+                    System.out.println("Pages queried.");
+
+                    for (PageView view : views) {
+                        session.execute(stmtView.bind(view.getAppKey()));
+                    }
+
+                    System.out.println("Views queries.");
+
+                    for (UrlSimilarityScore score : scores) {
+                        session.execute(stmtScore.bind(score.getAppKey()));
+                    }
+
+                    System.out.println("Scores queried for iteration.");
+                    sleep(1000);
                 }
-
-                System.out.println("Views queries.");
-
-                for (UrlSimilarityScore score : scores) {
-                    session.execute(stmtScore.bind(score.getAppKey()));
-                }
-
-                System.out.println("Scores queried for iteration.");
             }
+        }
+        catch(InterruptedException e) {
+            System.out.println("InterruptedException: " + e.getMessage());
         }
         catch(Exception any) {
             System.out.println("Exception: " + any.getMessage());

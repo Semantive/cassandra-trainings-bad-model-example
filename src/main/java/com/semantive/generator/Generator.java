@@ -18,6 +18,24 @@ public class Generator {
 
     private Random random;
 
+    public static Map<String, Long> appKeys = new HashMap<>();
+
+    static {
+        appKeys.put("GOOGLE", 64L);
+        appKeys.put("ONET", 32L);
+
+        appKeys.put("BLOG1", 2L);
+        appKeys.put("BLOG2", 2L);
+        appKeys.put("BLOG3", 2L);
+
+        appKeys.put("BLOG4", 1L);
+        appKeys.put("BLOG5", 1L);
+        appKeys.put("BLOG6", 1L);
+
+        appKeys.put("SITE1", 8L);
+        appKeys.put("SITE3", 8L);
+        appKeys.put("SITE3", 8L);
+    }
 
     public Generator() {
         this.random = new Random();
@@ -39,19 +57,6 @@ public class Generator {
         return result.toString();
     }
 
-    private String genAppKey() {
-        return genString(APPKEY_LENGTH);
-    }
-
-    public Set<String> appKeys(int n) {
-        Set<String> results = new HashSet<>(n);
-
-        for(int i = 0; i < n; ++ i)
-            results.add(genAppKey());
-
-        return results;
-    }
-
     private Page genPage(String appKey) {
         return new Page(
             genString(URL_LENGTH),
@@ -69,12 +74,11 @@ public class Generator {
         );
     }
 
-    public Set<Page> pages(Set<String> appKeys, int n) {
-        Set<Page> results = new HashSet<>(n * appKeys.size());
+    public Set<Page> pages(String appKey, int n) {
+        Set<Page> results = new HashSet<>(n * appKeys.size() * 32);
 
-        for(int i = 0; i < n; ++ i)
-            for(String appKey: appKeys)
-                results.add(genPage(appKey));
+        for(int i = 0; i < n * Generator.appKeys.get(appKey); ++ i)
+            results.add(genPage(appKey));
 
         return results;
     }
@@ -96,12 +100,11 @@ public class Generator {
         );
     }
 
-    public Set<PageView> views(Set<String> appKeys, int n) {
-        Set<PageView> results = new HashSet<>(n * appKeys.size());
+    public Set<PageView> views(String appKey, int n) {
+        Set<PageView> results = new HashSet<>(n * appKeys.size() * 32);
 
-        for(int i = 0; i < n; ++ i)
-            for(String appKey: appKeys)
-                results.add(genView(appKey));
+        for(int i = 0; i < n * Generator.appKeys.get(appKey); ++ i)
+            results.add(genView(appKey));
 
         return results;
     }
@@ -115,12 +118,11 @@ public class Generator {
         );
     }
 
-    public Set<UrlSimilarityScore> scores(Set<String> appKeys, int n) {
-        Set<UrlSimilarityScore> results = new HashSet<>(n * appKeys.size());
+    public Set<UrlSimilarityScore> scores(String appKey, int n) {
+        Set<UrlSimilarityScore> results = new HashSet<>(n * appKeys.size() * 32);
 
-        for(int i = 0; i < n; ++ i)
-            for(String appKey: appKeys)
-                results.add(genUrlSimilarityScore(appKey));
+        for(int i = 0; i < n * Generator.appKeys.get(appKey); ++ i)
+            results.add(genUrlSimilarityScore(appKey));
 
         return results;
     }
