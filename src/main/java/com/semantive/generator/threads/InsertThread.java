@@ -1,5 +1,6 @@
 package com.semantive.generator.threads;
 
+import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 import com.semantive.generator.Generator;
@@ -50,16 +51,19 @@ public class InsertThread extends CassandraThread {
                             "cleaned_url, app_key, attributes, created_at, " +
                             "image_url, keywords, raw_html, recommendable, " +
                             "text_content, text_content_trunc, title, url)" +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+                        .setConsistencyLevel(ConsistencyLevel.ONE);
 
                     PreparedStatement stmtView = session.prepare("INSERT INTO page_views (" +
                             "app_key, id, att_sec, b, " +
                             "client_timestamp, ip, raw_url, received_at, " +
                             "session_id, uid, url, " +
-                            "useragent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                            "useragent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+                        .setConsistencyLevel(ConsistencyLevel.ONE);
 
                     PreparedStatement stmtScore = session.prepare("INSERT INTO url_similarity_score (" +
-                            "app_key, url1, url2, sim_score) VALUES (?, ?, ?, ?)");
+                            "app_key, url1, url2, sim_score) VALUES (?, ?, ?, ?)")
+                        .setConsistencyLevel(ConsistencyLevel.ONE);
 
                     for (Page page : pages) {
                         session.execute(stmtPage.bind(

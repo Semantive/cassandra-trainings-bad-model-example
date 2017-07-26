@@ -1,5 +1,6 @@
 package com.semantive.generator.threads;
 
+import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 import com.semantive.generator.Generator;
@@ -45,17 +46,17 @@ public class SelectThread extends CassandraThread {
 
                     System.out.println("Data generated: " + threshold);
 
-                    PreparedStatement stmtPage = session.prepare("SELECT * " +
-                            "FROM pages " +
-                            "WHERE cleaned_url = ?");
+                    PreparedStatement stmtPage = session
+                        .prepare("SELECT * FROM pages WHERE cleaned_url = ?")
+                        .setConsistencyLevel(ConsistencyLevel.ONE);
 
-                    PreparedStatement stmtView = session.prepare("SELECT * " +
-                            "FROM page_views " +
-                            "WHERE app_key = ?");
+                    PreparedStatement stmtView = session
+                        .prepare("SELECT * FROM page_views WHERE app_key = ?")
+                        .setConsistencyLevel(ConsistencyLevel.ONE);
 
-                    PreparedStatement stmtScore = session.prepare("SELECT * " +
-                            "FROM url_similarity_score " +
-                            "WHERE app_key = ?");
+                    PreparedStatement stmtScore = session
+                        .prepare("SELECT * FROM url_similarity_score WHERE app_key = ?")
+                        .setConsistencyLevel(ConsistencyLevel.ONE);
 
                     for (Page page : pages) {
                         session.execute(stmtPage.bind(page.getCleanedUrl()));
