@@ -1,0 +1,58 @@
+#
+# Keyspace 
+#
+keyspace: overload
+keyspace_definition: |
+  CREATE KEYSPACE IF NOT EXISTS overload WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};
+
+#
+# Table name and create CQL
+#
+table: page_views
+table_definition: |
+  CREATE TABLE IF NOT EXISTS page_views (
+    app_key text,
+    id timeuuid,
+    att_sec int,
+    b int,
+    client_timestamp timestamp,
+    ip inet,
+    raw_url text,
+    received_at timestamp,
+    session_id text,
+    uid text,
+    url text,
+    useragent text,
+    PRIMARY KEY (app_key, id)
+  ) WITH CLUSTERING ORDER BY (id ASC);
+
+#
+# Meta information for generating data
+#  name: column name
+#  size: length 
+#  population: type of population, eg:
+#    uniform(1..n) - n different values, equally probable
+#    exp(1..n) - n different values, exponential probability
+#
+columnspec:
+  - name: app_key
+    population: EXP(1..10000000)   
+  - name: id
+    population: UNIFORM(1..1000000000)
+
+#
+# INSERT queries
+#
+insert:
+  batchtype: UNLOGGED       # use unlogged batches
+ 
+#
+# SELECT queries
+#
+queries:
+   single:
+      cql: SELECT * FROM page_views WHERE app_key = ? AND id = ? 
+      fields: samerow
+   full-row:
+      cql: SELECT * FROM page_views WHERE app_key = ?
+      fields: multirow

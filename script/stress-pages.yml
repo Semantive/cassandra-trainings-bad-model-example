@@ -1,0 +1,58 @@
+#
+# Keyspace 
+#
+keyspace: overload
+keyspace_definition: |
+  CREATE KEYSPACE IF NOT EXISTS overload WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};
+
+#
+# Table name and create CQL
+#
+table: pages
+table_definition: |
+  CREATE TABLE IF NOT EXISTS pages (
+    cleaned_url text,
+    app_key text,
+    attributes text,
+    created_at timestamp,
+    image_url text,
+    keywords text,
+    raw_html text,
+    recommendable boolean,
+    text_content text,
+    text_content_trunc text,
+    title text,
+    url text,
+    PRIMARY KEY (cleaned_url, app_key)
+  ) WITH CLUSTERING ORDER BY (app_key ASC);
+
+#
+# Meta information for generating data
+#  name: column name
+#  size: length 
+#  population: type of population, eg:
+#    uniform(1..n) - n different values, equally probable
+#    exp(1..n) - n different values, exponential probability
+#
+columnspec:
+  - name: app_key
+    population: EXP(1..10000000)   
+  - name: cleaned_url
+    population: UNIFORM(1..100000000000)
+
+#
+# INSERT queries
+#
+insert:
+  batchtype: UNLOGGED       # use unlogged batches
+ 
+#
+# SELECT queries
+#
+queries:
+   single:
+      cql: SELECT * FROM pages WHERE app_key = ? AND cleaned_url = ? 
+      fields: samerow
+   full-row:
+      cql: SELECT * FROM pages WHERE cleaned_url = ?
+      fields: multirow

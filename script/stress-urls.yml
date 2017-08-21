@@ -1,0 +1,45 @@
+#
+# Keyspace 
+#
+keyspace: overload
+keyspace_definition: |
+  CREATE KEYSPACE IF NOT EXISTS overload WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};
+
+#
+# Table name and create CQL
+#
+table: url_similarity_score
+table_definition: |
+  CREATE TABLE IF NOT EXISTS url_similarity_score (
+    app_key text,
+    url1 text,
+    sim_score float,
+    url2 text,
+    PRIMARY KEY (app_key, url1, sim_score, url2)
+  ) WITH CLUSTERING ORDER BY (url1 DESC, sim_score DESC, url2 ASC);
+
+#
+# Meta information for generating data
+#  name: column name
+#  size: length 
+#  population: type of population, eg:
+#    uniform(1..n) - n different values, equally probable
+#    exp(1..n) - n different values, exponential probability
+#
+columnspec:
+  - name: app_key
+    population: EXP(1..10000000)   
+
+#
+# INSERT queries
+#
+insert:
+  batchtype: UNLOGGED       # use unlogged batches
+ 
+#
+# SELECT queries
+#
+queries:
+   full-row:
+      cql: SELECT * FROM url_similarity_score WHERE app_key = ? AND url1 = ?
+      fields: multirow
