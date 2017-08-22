@@ -2,7 +2,7 @@
 Schema creation is supported in two different ways: using CQL shell (and creating only the structure) or by cassandra-stress-test tool (along with populating the tables).
 
 ## Using cqlsh
-Use `cqlsh -e schema.overload.cql` to load CQL schema. This import will not create any data inside the structure (only keyspace and tables).
+Use `cqlsh -f schema.overload.cql` to load CQL schema. This import will not create any data inside the structure (only keyspace and tables).
 
 ## Using cassandra-stress-test
 1. Load `pages` table using test tool, eg: 
