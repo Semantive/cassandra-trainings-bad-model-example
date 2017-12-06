@@ -1,15 +1,10 @@
 package com.semantive.generator;
 
 import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
-import com.semantive.generator.model.Page;
-import com.semantive.generator.model.PageView;
-import com.semantive.generator.model.UrlSimilarityScore;
+import com.datastax.driver.core.policies.RoundRobinPolicy;
 import com.semantive.generator.threads.InsertThread;
 import com.semantive.generator.threads.SelectThread;
-
-import java.util.Set;
 
 import static java.lang.System.exit;
 
@@ -31,6 +26,7 @@ public class App {
         try {
             cluster = Cluster.builder()
                     .addContactPoint(host)
+                    .withLoadBalancingPolicy(new RoundRobinPolicy())
                     .build();
 
             session = cluster.connect(keyspace);
